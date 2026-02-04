@@ -42,3 +42,32 @@ export async function loginUsuarioService(email, password) {
         token: token
     };
 };
+
+export async function cadastroUsuarioService( nome, email, password, tipo_usuario ) {
+
+    // Verificando se o email já está cadastrado
+    const result = await pool.query('SELECT id_usuario FROM usuario WHERE email = $1', [email]);
+    const rows = result.rows;
+
+    if(rows.length > 0) {
+        throw new Error('Email já cadastrado');
+    };
+
+    // Validando o tipo de usuário
+    if(!['admin', 'usuario'].includes(tipo_usuario)) {
+        throw new Error('Tipo de usuário inválido');
+    }
+
+    const hashPass = await bcrypt.hash(password, 10);
+
+    // Inserindo o novo usuário no banco de dados
+    await pool.query(
+        'INSERT INTO usuario (nome, email, senha, tipo_usuario, status) VALUES ($1, $2, $3, $4, $5)',
+        [nome, email, hashPass, tipo_usuario, 'ativo']
+    )
+
+    return {
+        message: 'Usuário cadastrado com sucesso!'
+    };
+
+}

@@ -11,7 +11,7 @@ export function authMiddleware(req, res, next) {
         })
     };
 
-    const [, token] = authHeader.split('');
+    const [, token] = authHeader.split(' ');
 
     if(!token){
         return res.status(401).json({

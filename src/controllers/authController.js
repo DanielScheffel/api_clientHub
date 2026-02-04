@@ -1,4 +1,4 @@
-import { loginUsuarioService } from '../service/authService.js';
+import { cadastroUsuarioService, loginUsuarioService } from '../service/authService.js';
 
 export async function loginUsuarioController(req, res) {
     
@@ -31,5 +31,31 @@ export async function loginUsuarioController(req, res) {
         return res.status(500).json({ message: err.message });
     }
 
+
+}
+
+export async function cadastroUsuarioController(req, res) {
+
+    const { nome, email, password, tipo_usuario } = req.body;
+
+    try {
+
+        if(!nome || !email || !password || !tipo_usuario){
+            return res.status(400).json({
+                message: 'Nome, email, senha, e tipo de usuário são obrigatórios'
+            });
+    }
+
+    const result = await cadastroUsuarioService(nome, email, password, tipo_usuario)
+
+    return res.status(201).json(result)
+
+    } catch (err) {
+        if(err.message === 'Usuário já existe' || err.message.includes('Inválido')) {
+            return res.status(400).json({ message: err.message });
+        }
+
+        return res.status(500).json({ message: err.message });
+    }
 
 }
