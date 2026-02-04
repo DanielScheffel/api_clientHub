@@ -9,10 +9,6 @@ export async function cadastroClienteController(req, res) {
 
         const { nome, email, contato, empresa, origem, observacao } = req.body;
 
-        if(!nome) {
-            return res.status(400).json({ mensagem: "O campo 'nome' é obrigatório." });
-        }
-
         // Lógica para cadastrar o cliente usando os dados fornecidos
         const cliente = await cadastrarClienteService({
             nome, email, contato, empresa, origem, status: "ativo", observacao, usuarioId

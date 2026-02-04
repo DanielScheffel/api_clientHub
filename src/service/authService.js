@@ -43,7 +43,7 @@ export async function loginUsuarioService(email, password) {
     };
 };
 
-export async function cadastroUsuarioService( nome, email, password, tipo_usuario ) {
+export async function cadastroUsuarioService( nome, email, senha, tipo_usuario ) {
 
     // Verificando se o email já está cadastrado
     const result = await pool.query('SELECT id_usuario FROM usuario WHERE email = $1', [email]);
@@ -58,7 +58,7 @@ export async function cadastroUsuarioService( nome, email, password, tipo_usuari
         throw new Error('Tipo de usuário inválido');
     }
 
-    const hashPass = await bcrypt.hash(password, 10);
+    const hashPass = await bcrypt.hash(senha, 10);
 
     // Inserindo o novo usuário no banco de dados
     await pool.query(
