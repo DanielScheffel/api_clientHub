@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { cadastroClienteController, listarClientesController } from '../controllers/userController.js';
+import { atualizarStatusClienteController, cadastroClienteController, listarClientesController } from '../controllers/userController.js';
 import { validationMiddleware } from '../middlewares/validatorMiddleware.js';
 import { createUsuarioValidator } from '../validators/clienteValidator.js';
 
@@ -20,5 +20,9 @@ router.get('/clientes',
     listarClientesController
 )
 
+router.patch('/cliente/:clienteId/status',
+    authMiddleware,
+    atualizarStatusClienteController
+)
 
 export default router;
