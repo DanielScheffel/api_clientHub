@@ -3,6 +3,7 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { atualizarStatusClienteController, 
     buscarClienteIdController, 
     cadastroClienteController, 
+    editarClienteController, 
     listarClientesController } 
 from '../controllers/userController.js';
 import { validationMiddleware } from '../middlewares/validatorMiddleware.js';
@@ -27,6 +28,11 @@ router.get('/clientes',
 router.get('/cliente/:clienteId',
     authMiddleware,
     buscarClienteIdController
+)
+
+router.put('/cliente/:clienteId',
+    authMiddleware,
+    editarClienteController
 )
 
 router.patch('/cliente/:clienteId/status',

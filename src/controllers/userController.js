@@ -1,4 +1,9 @@
-import { atualizarStatusClienteService, buscarClienteIdService, cadastrarClienteService, listarClienteService } from "../service/userService.js";
+import { atualizarStatusClienteService,
+    buscarClienteIdService, 
+    cadastrarClienteService, 
+    editarClienteService, 
+    listarClienteService } 
+from "../service/userService.js";
 
 
 export async function cadastroClienteController(req, res) {
@@ -64,6 +69,29 @@ export async function buscarClienteIdController(req, res) {
         return res.status(500).json({
             message: error.message
         })
+    }
+
+}
+
+export async function editarClienteController(req, res) {
+
+    try {
+
+        const usuarioId = req.user.id;
+        const { clienteId } = req.params;
+        const dadosCliente = req.body;
+
+        const clienteAtualizado = await editarClienteService({ clienteId, dadosCliente, usuarioId });
+
+        return res.status(200).json({
+            message: 'Cliente atualizado com sucesso.',
+            clienteAtualizado
+        })
+    } catch (error) {
+        console.error('Erro ao editar cliente:', error);
+        return res.status(500).json({
+            message: error.message
+        });
     }
 
 }

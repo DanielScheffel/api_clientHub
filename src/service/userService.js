@@ -39,6 +39,23 @@ export async function buscarClienteIdService({ clienteId, usuarioId }) {
 
 }
 
+export async function editarClienteService({ clienteId, dadosCliente, usuarioId }) {
+
+    const { nome, email, contato, empresa, observacao } = dadosCliente;
+
+    const result = await pool.query(
+        `UPDATE cliente SET nome = $1, email = $2, contato = $3, empresa = $4, observacao = $5 WHERE id_cliente = $6 AND usuario_id = $7 RETURNING *`,
+        [nome, email, contato, empresa, observacao, clienteId, usuarioId]
+    )
+
+    if(result.rows.length === 0) {
+        throw new Error('Cliente não encontrado ou sem permissão para editar.');
+    }
+
+    return result.rows[0];
+
+}
+
 export async function atualizarStatusClienteService({ clienteId, novoStatus, usuarioId }) {
 
     const statusAtualizado = ["novo", "contatado", "negociacao", "perdido", "fechado"];
