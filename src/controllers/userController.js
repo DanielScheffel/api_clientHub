@@ -1,4 +1,4 @@
-import { atualizarStatusClienteService, cadastrarClienteService, listarClienteService } from "../service/userService.js";
+import { atualizarStatusClienteService, buscarClienteIdService, cadastrarClienteService, listarClienteService } from "../service/userService.js";
 
 
 export async function cadastroClienteController(req, res) {
@@ -41,6 +41,29 @@ export async function listarClientesController(req, res) {
     } catch (error) {
         console.error('Erro ao listar clientes:', error);
         return res.status(500).json({ mensagem: 'Erro ao listar clientes.' });
+    }
+
+}
+
+export async function buscarClienteIdController(req, res) {
+
+    try {
+
+        const usuario_id = req.user.id;
+        const { clienteId } = req.params;
+
+        const cliente = await buscarClienteIdService({ clienteId, usuarioId: usuario_id });
+
+        return res.status(200).json({
+            message: 'Cliente encontrado com sucesso.',
+            cliente
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar cliente por ID:', error);
+        return res.status(500).json({
+            message: error.message
+        })
     }
 
 }

@@ -24,6 +24,21 @@ export async function listarClienteService(usuarioId) {
 
 }
 
+export async function buscarClienteIdService({ clienteId, usuarioId }) {
+
+    const result = await pool.query(
+        `SELECT * FROM cliente WHERE id_cliente = $1 AND usuario_id = $2`,
+        [clienteId, usuarioId]
+    )
+
+    if(result.rows.length === 0) {
+        throw new Error('Cliente não encontrado.');
+    }
+
+    return result.rows[0];
+
+}
+
 export async function atualizarStatusClienteService({ clienteId, novoStatus, usuarioId }) {
 
     const statusAtualizado = ["novo", "contatado", "negociacao", "perdido", "fechado"];
