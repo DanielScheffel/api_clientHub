@@ -1,8 +1,10 @@
 import { atualizarStatusClienteService,
     buscarClienteIdService, 
     cadastrarClienteService, 
+    deleteClienteService, 
     editarClienteService, 
-    listarClienteService } 
+    listarClienteService, 
+    listarHistoricoClienteService} 
 from "../service/userService.js";
 
 
@@ -16,7 +18,7 @@ export async function cadastroClienteController(req, res) {
 
         // Lógica para cadastrar o cliente usando os dados fornecidos
         const cliente = await cadastrarClienteService({
-            nome, email, contato, empresa, origem, status: "Novo", observacao, usuarioId
+            nome, email, contato, empresa, origem, status: "novo", observacao, usuarioId
         });
 
 
@@ -50,14 +52,35 @@ export async function listarClientesController(req, res) {
 
 }
 
+export async function listarHistoricoClienteController(req, res) {
+    try {
+        const usuarioId = req.user.id;
+        const { clienteId } = req.params;
+
+        const historico =await listarHistoricoClienteService(clienteId, usuarioId);
+
+        return res.status(200).json({
+            clienteId,
+            total: historico.length,
+            historico
+        })
+
+    } catch (error) {
+        console.error('Erro ao listar histórico do cliente:', error);
+        if (error.message === 'Cliente não encontrado.') {
+            return res.status(404).json({ mensagem: error.message });
+        }
+    }
+}
+
 export async function buscarClienteIdController(req, res) {
 
     try {
 
-        const usuario_id = req.user.id;
+        const usuarioId = req.user.id;
         const { clienteId } = req.params;
 
-        const cliente = await buscarClienteIdService({ clienteId, usuarioId: usuario_id });
+        const cliente = await buscarClienteIdService({ clienteId, usuarioId: usuarioId });
 
         return res.status(200).json({
             message: 'Cliente encontrado com sucesso.',
@@ -65,7 +88,14 @@ export async function buscarClienteIdController(req, res) {
         });
 
     } catch (error) {
-        console.error('Erro ao buscar cliente por ID:', error);
+        
+        if(error.message === 'Cliente não encontrado.') {
+            return res.status(404).json({
+                message: error.message
+            });
+        }
+
+
         return res.status(500).json({
             message: error.message
         })
@@ -88,7 +118,13 @@ export async function editarClienteController(req, res) {
             clienteAtualizado
         })
     } catch (error) {
-        console.error('Erro ao editar cliente:', error);
+        
+        if (error.message.includes('Não encontrado') || error.message.includes('Nenhum campo para atualizar')) {
+            return res.status(400).json({
+                message: error.message
+            })
+        }
+
         return res.status(500).json({
             message: error.message
         });
@@ -106,7 +142,7 @@ export async function atualizarStatusClienteController(req, res) {
 
         const result = await atualizarStatusClienteService({
             clienteId,
-            novoStatus,
+            novoStatus: novoStatus,
             usuarioId
         });
 
@@ -117,8 +153,34 @@ export async function atualizarStatusClienteController(req, res) {
 
     } catch(error) {
         console.error('Erro ao atualizar status do cliente:', error);
-        return res.status(500).json({
+        return res.status(400).json({
             message: error.message
         });
     }
+}
+
+export async function deletarClienteController(req, res) {
+
+    try {
+
+        const usuarioId = req.user.id;
+        const { clienteId } = req.params;
+
+        // Lógica para deletar o cliente usando o ID fornecido
+        const result = await deleteClienteService({ clienteId, usuarioId });
+
+        return res.status(200).json({
+            message: 'Cliente deletado com sucesso.',
+            result
+        });
+
+    } catch (error) {
+        
+        if(error.message.includes('não encontrado')) {
+            return res.status(404).json({ mensagem: error.message });
+        }
+
+        return res.status(500).json({ mensagem: 'Erro ao deletar cliente.' });
+    }
+
 }
