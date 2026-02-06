@@ -9,6 +9,7 @@ import './database/config.js';
 
 import authRoute from './routes/authRoute.js';
 import clienteRoute from './routes/clienteRoute.js';
+import kpiRoute from './routes/kpiRoute.js';
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cors());
 
 app.use("/", authRoute)
 app.use("/usuario", clienteRoute)
+app.use("/dashboard", kpiRoute)
 
 
 if(process.env.NODE_ENV === 'development') {
