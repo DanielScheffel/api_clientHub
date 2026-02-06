@@ -1,7 +1,8 @@
 import { atualizarStatusUsuarioService, 
     atualizarUsuarioService, 
     cadastroUsuarioService, 
-    loginUsuarioService } 
+    loginUsuarioService, 
+    reatribuirClientesService} 
     from '../service/authService.js';
 
 export async function loginUsuarioController(req, res) {
@@ -88,6 +89,40 @@ export async function atualizarStatusUsuarioController(req, res) {
         })
 
     } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        })
+    }
+
+}
+
+export async function reatribuirClientesController(req, res) {
+    try {
+        const { usuarioId } = req.params;
+        const { novoUsuarioId } = req.body;
+        const usuarioLogado = req.user;
+
+        if(!novoUsuarioId) {
+            return res.status(400).json({
+                message: 'Informe o novo usuário'
+            })
+        }
+
+        const resultado = await reatribuirClientesService({
+            usuarioAntigoId: usuarioId,
+            novoUsuarioId,
+            usuarioLogado
+        })
+
+        return res.status(200).json({
+            message: 'Clientes reatribuídos com sucesso',
+            resultado
+        })
+
+    } catch (error) {
+
+        console.error('Erro ao reatribuir novo usuário', error)
+
         return res.status(400).json({
             message: error.message
         })

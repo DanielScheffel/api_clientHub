@@ -135,3 +135,46 @@ export async function atualizarStatusUsuarioService(usuarioId, status, usuarioLo
     return result.rows[0];
 
 }
+
+export async function reatribuirClientesService({ usuarioAntigoId, novoUsuarioId, usuarioLogado }) {
+    // Somente admin pode reatribuir clientes
+    if(usuarioLogado.tipo_usuario !== 'admin') {
+        throw new Error('Apenas administradores podem reatribuir clientes')
+    }
+
+    // Verificando se usuário antigo existe
+    const usuarioAntigoResult = await pool.query(
+        `SELECT id_usuario FROM usuario WHERE id_usuario = $1`,
+        [usuarioAntigoId]
+    )
+
+    if(usuarioAntigoResult.rows.length === 0){
+        throw new Error('Usuário de origem não encontrado')
+    }
+
+    // Verificando se o novo usuário existe e está ativo
+    const novoUsuarioResult = await pool.query(
+        `SELECT id_usuario, status FROM usuario WHERE id_usuario = $1`,
+        [novoUsuarioId]
+    )
+
+    if(novoUsuarioResult.rows.length === 0){
+        throw new Error('Novo usuário não encontrado');
+    }
+
+    if(novoUsuarioResult.rows[0].status !== 'ativo'){
+        throw new Error('Não é possível reatribuir clientes para um novo usuário inativo')
+    }
+
+    // Atualizando os clientes
+    const result = await pool.query(
+        `UPDATE cliente SET usuario_id = $1 WHERE usuario_id = $2 RETURNING id_cliente`,
+        [novoUsuarioId, usuarioAntigoId]
+    )
+
+    return {
+        message: 'Clientes reatribuídos com sucesso',
+        totalClientes: result.rows.length
+    }
+
+}

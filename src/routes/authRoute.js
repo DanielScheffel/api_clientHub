@@ -2,7 +2,8 @@ import express from 'express';
 import { atualizarStatusUsuarioController,
     atualizarUsuarioController, 
     cadastroUsuarioController, 
-    loginUsuarioController } 
+    loginUsuarioController, 
+    reatribuirClientesController} 
 from '../controllers/authController.js';
 import { adminMiddleware } from '../middlewares/adminMiddleware.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
@@ -34,6 +35,11 @@ router.put('/usuario/:usuarioId/atualizar',
 router.put('/usuario/:usuarioId/status',
     authMiddleware,
     atualizarStatusUsuarioController
+)
+
+router.patch('/usuarios/:usuarioId/reatribuir-clientes',
+    authMiddleware,
+    reatribuirClientesController
 )
 
 export default router;
