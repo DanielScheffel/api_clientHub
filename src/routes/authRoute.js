@@ -1,5 +1,9 @@
 import express from 'express';
-import { cadastroUsuarioController, loginUsuarioController } from '../controllers/authController.js';
+import { atualizarStatusUsuarioController,
+    atualizarUsuarioController, 
+    cadastroUsuarioController, 
+    loginUsuarioController } 
+from '../controllers/authController.js';
 import { adminMiddleware } from '../middlewares/adminMiddleware.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { cadastroUsuario, loginUsuario } from '../validators/authValidator.js';
@@ -21,5 +25,15 @@ router.post('/cadastro',
     validationMiddleware,
     cadastroUsuarioController
 );
+
+router.put('/usuario/:usuarioId/atualizar',
+    authMiddleware,
+    atualizarUsuarioController
+)
+
+router.put('/usuario/:usuarioId/status',
+    authMiddleware,
+    atualizarStatusUsuarioController
+)
 
 export default router;

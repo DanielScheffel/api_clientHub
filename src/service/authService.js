@@ -15,9 +15,9 @@ export async function loginUsuarioService(email, password) {
     const user = rows[0];
 
     // Verificando se o usuário está ativo
-    if(user.status !== "ativo") {
-        throw new Error('Usuário inativo');
-    };
+    if(user.status !== 'ativo') {
+        throw new Error('Usuário inativo. Acesso bloqueado.')
+    }
 
     // Verificando a senha
     const passValid = await bcrypt.compare(password, user.senha);
@@ -69,5 +69,69 @@ export async function cadastroUsuarioService( nome, email, senha, tipo_usuario )
     return {
         message: 'Usuário cadastrado com sucesso!'
     };
+
+}
+
+export async function atualizarUsuarioService({ usuarioId, dados, usuarioLogado }) {
+    const { nome, email, tipo_usuario } = dados;
+
+
+    const result = await pool.query(
+        `SELECT id_usuario, tipo_usuario FROM usuario WHERE id_usuario = $1`,
+        [usuarioId]
+    );
+
+    if(result.rows.length === 0) {
+        throw new Error('Usuário não encontrado')
+    }
+
+    const usuarioAlvo = result.rows[0];
+
+
+    if(
+        usuarioLogado.tipo_usuario !== 'admin' &&
+        usuarioLogado.id !== usuarioAlvo.id_usuario
+    ) {
+        throw new Error('Sem permissão para editar este usuário');
+    }
+
+    if(usuarioLogado.tipo_usuario !== 'admin' && tipo_usuario) {
+        throw new Error('Usuário comum não pode alterar tipo de usuário')
+    };
+
+    const atualizado = await pool.query(
+        `UPDATE usuario SET nome = COALESCE($1, nome), email = COALESCE($2, email),
+        tipo_usuario = COALESCE($3, tipo_usuario)
+        WHERE id_usuario = $4
+        RETURNING id_usuario, nome, email, tipo_usuario, status`,
+        [nome, email, tipo_usuario, usuarioId]
+    )
+
+    return atualizado.rows[0];
+}
+
+export async function atualizarStatusUsuarioService(usuarioId, status, usuarioLogado) {
+
+    if(usuarioLogado.tipo_usuario !== 'admin'){
+        throw new Error('Apenas administradores podem alterar status de usuário')
+    }
+
+    if(!['ativo', 'inativo'].includes(status)){
+        throw new Error('Status inválido');
+    }
+
+    const result = await pool.query(
+        `UPDATE usuario
+        SET status = $1
+        WHERE id_usuario = $2
+        RETURNING id_usuario, nome, email, tipo_usuario, status`,
+        [status, usuarioId]
+    )
+
+    if(result.rows.length === 0) {
+        throw new Error('Usuário não encontrado')
+    }
+
+    return result.rows[0];
 
 }
