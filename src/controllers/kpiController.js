@@ -1,4 +1,4 @@
-import { kpiClientePorStatusService } from "../service/kpisService.js";
+import { kpiClientePorStatusService, kpiClientePorUsuarioService } from "../service/kpisService.js";
 
 
 export async function kpiClientePorStatusController(req, res) {
@@ -15,6 +15,24 @@ export async function kpiClientePorStatusController(req, res) {
 
         return res.status(500).json({
             message: 'Erro ao buscar KPI'
+        })
+    }
+
+}
+
+export async function kpiClientePorUsuarioController(req, res) {
+    try {
+        const usuarioLogado = req.user;
+
+        const dados = await kpiClientePorUsuarioService(usuarioLogado);
+
+        return res.status(200).json(dados);
+
+    } catch (error) {
+        console.error('Erro ao buscar KPI clientes por usuario: ', error);
+
+        return res.status(400).json({
+            message: error.message
         })
     }
 
