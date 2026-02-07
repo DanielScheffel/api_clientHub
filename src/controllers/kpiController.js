@@ -1,4 +1,4 @@
-import { kpiClientePorStatusService, kpiClientePorUsuarioService } from "../service/kpisService.js";
+import { kpiClientePorStatusService, kpiClientePorUsuarioService, kpiConversaoGlobalService, kpiConversaoPorUsuarioService } from "../service/kpisService.js";
 
 
 export async function kpiClientePorStatusController(req, res) {
@@ -36,4 +36,25 @@ export async function kpiClientePorUsuarioController(req, res) {
         })
     }
 
+}
+
+export async function kpiConversaoController(req, res) {
+    try {
+        const { tipo } = req.query;
+
+        let resultado;
+
+        if (tipo === 'usuario') {
+            resultado = await kpiConversaoPorUsuarioService();
+        } else {
+            // default: global
+            resultado = await kpiConversaoGlobalService();
+        }
+
+        return res.status(200).json(resultado);
+
+    } catch (error) {
+        console.error('Erro KPI conversão', error);
+        return res.status(400).json({ message: error.message });
+    }
 }

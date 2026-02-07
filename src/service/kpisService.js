@@ -51,3 +51,41 @@ export async function kpiClientePorUsuarioService(usuarioLogado) {
     return result.rows;
 
 }
+
+export async function kpiConversaoGlobalService() {
+    const result = await pool.query(`
+        SELECT 
+            COUNT(*) FILTER (WHERE status = 'fechado') AS fechados,
+            COUNT(*) AS total,
+            ROUND(
+                COUNT(*) FILTER (WHERE status = 'fechado') * 100.0 
+                / NULLIF(COUNT(*), 0),
+                2
+            ) AS taxa_conversao
+        FROM cliente
+    `);
+
+    return result.rows[0];
+}
+
+export async function kpiConversaoPorUsuarioService() {
+    const result = await pool.query(`
+        SELECT 
+            u.id_usuario,
+            u.nome,
+            COUNT(*) FILTER (WHERE c.status = 'fechado') AS fechados,
+            COUNT(c.id_cliente) AS total,
+            ROUND(
+                COUNT(*) FILTER (WHERE c.status = 'fechado') * 100.0 
+                / NULLIF(COUNT(c.id_cliente), 0),
+                2
+            ) AS taxa_conversao
+        FROM usuario u
+        LEFT JOIN cliente c 
+            ON c.usuario_id = u.id_usuario
+        GROUP BY u.id_usuario, u.nome
+        ORDER BY taxa_conversao DESC
+    `);
+
+    return result.rows;
+}
