@@ -89,3 +89,28 @@ export async function kpiConversaoPorUsuarioService() {
 
     return result.rows;
 }
+
+export async function kpiTempoMedioStatusService() {
+    const result = await pool.query(`
+        WITH tempos AS (
+            SELECT
+                status_novo AS status,
+                EXTRACT(EPOCH FROM (
+                    LEAD(data_mudanca) OVER (
+                        PARTITION BY cliente_id
+                        ORDER BY data_mudanca
+                    ) - data_mudanca
+                )) / 3600 AS tempo_horas
+            FROM cliente_status_historico
+        )
+        SELECT
+            status,
+            ROUND(AVG(tempo_horas)::numeric, 2) AS tempo_medio_horas
+        FROM tempos
+        WHERE tempo_horas IS NOT NULL
+        GROUP BY status
+        ORDER BY status;
+    `);
+
+    return result.rows;
+}

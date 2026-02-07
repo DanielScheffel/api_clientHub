@@ -1,4 +1,4 @@
-import { kpiClientePorStatusService, kpiClientePorUsuarioService, kpiConversaoGlobalService, kpiConversaoPorUsuarioService } from "../service/kpisService.js";
+import { kpiClientePorStatusService, kpiClientePorUsuarioService, kpiConversaoGlobalService, kpiConversaoPorUsuarioService, kpiTempoMedioStatusService } from "../service/kpisService.js";
 
 
 export async function kpiClientePorStatusController(req, res) {
@@ -58,3 +58,19 @@ export async function kpiConversaoController(req, res) {
         return res.status(400).json({ message: error.message });
     }
 }
+
+export async function kpiTempoMedioStatusController(req, res) {
+    try {
+        const dados = await kpiTempoMedioStatusService();
+
+        return res.status(200).json(dados);
+
+    } catch (error) {
+        console.error('Erro KPI tempo médio por status', error);
+
+        return res.status(500).json({
+            message: 'Erro ao calcular KPI'
+        });
+    }
+}
+

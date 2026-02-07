@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { kpiClientePorStatusController, kpiClientePorUsuarioController, kpiConversaoController } from '../controllers/kpiController.js';
+import { kpiClientePorStatusController, kpiClientePorUsuarioController, kpiConversaoController, kpiTempoMedioStatusController } from '../controllers/kpiController.js';
 
 const router = express.Router();
 
@@ -18,5 +18,12 @@ router.get('/kpis/conversao',
     authMiddleware,
     kpiConversaoController
 )
+
+router.get(
+    '/kpis/tempo-status',
+    authMiddleware,
+    kpiTempoMedioStatusController
+);
+
 
 export default router;
