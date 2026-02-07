@@ -34,14 +34,15 @@ export async function kpiClientePorUsuarioService(usuarioLogado) {
     }
 
     const query = `
-        SELECT 
+        SELECT
             u.id_usuario,
             u.nome,
             COUNT(c.id_cliente) AS total_clientes
         FROM usuario u
-        LEFT JOIN cliente c 
+        LEFT JOIN cliente c
             ON c.usuario_id = u.id_usuario
-        ${filtroUsuario}
+            AND c.deletado = false
+        WHERE u.status = 'ativo'
         GROUP BY u.id_usuario, u.nome
         ORDER BY total_clientes DESC
     `;

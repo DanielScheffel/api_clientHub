@@ -1,4 +1,9 @@
-import { kpiClientePorStatusService, kpiClientePorUsuarioService, kpiConversaoGlobalService, kpiConversaoPorUsuarioService, kpiTempoMedioStatusService } from "../service/kpisService.js";
+import { kpiClientePorStatusService, 
+    kpiClientePorUsuarioService, 
+    kpiConversaoGlobalService, 
+    kpiConversaoPorUsuarioService, 
+    kpiTempoMedioStatusService } 
+from "../service/kpisService.js";
 
 
 export async function kpiClientePorStatusController(req, res) {
