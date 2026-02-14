@@ -46,22 +46,30 @@ export async function kpiClientePorUsuarioController(req, res) {
 
 export async function kpiConversaoController(req, res) {
     try {
+
         const { tipo } = req.query;
+
+        const usuarioLogado = {
+            id: req.user.id,
+            tipo_usuario: req.user.tipo_usuario
+        };
 
         let resultado;
 
         if (tipo === 'usuario') {
-            resultado = await kpiConversaoPorUsuarioService();
+            resultado = await kpiConversaoPorUsuarioService(usuarioLogado);
         } else {
-            // default: global
-            resultado = await kpiConversaoGlobalService();
+            // default: conversão geral (mas respeitando regra admin/user)
+            resultado = await kpiConversaoGlobalService(usuarioLogado);
         }
 
         return res.status(200).json(resultado);
 
     } catch (error) {
         console.error('Erro KPI conversão', error);
-        return res.status(400).json({ message: error.message });
+        return res.status(500).json({
+            message: 'Erro ao buscar KPI de conversão'
+        });
     }
 }
 

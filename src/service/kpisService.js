@@ -19,7 +19,10 @@ export async function kpiClientePorStatusService(usuarioLogado) {
 
     const result = await pool.query(query, params);
 
-    return result.rows;
+    return result.rows.map(row => ({
+        status: row.status,
+        total: Number(row.total)
+    }));
 
 }
 
@@ -53,8 +56,8 @@ export async function kpiClientePorUsuarioService(usuarioLogado) {
 
 }
 
-export async function kpiConversaoGlobalService() {
-    const result = await pool.query(`
+export async function kpiConversaoGlobalService(usuarioLogado) {
+    let query = `
         SELECT 
             COUNT(*) FILTER (WHERE status = 'fechado') AS fechados,
             COUNT(*) AS total,
@@ -64,13 +67,26 @@ export async function kpiConversaoGlobalService() {
                 2
             ) AS taxa_conversao
         FROM cliente
-    `);
+    `;
 
-    return result.rows[0];
+    const params = [];
+
+    if (usuarioLogado.tipo_usuario !== 'admin') {
+        query += ` WHERE usuario_id = $1`;
+        params.push(usuarioLogado.id);
+    }
+
+    const result = await pool.query(query, params);
+
+    return {
+        fechados: Number(result.rows[0].fechados),
+        total: Number(result.rows[0].total),
+        taxa_conversao: Number(result.rows[0].taxa_conversao)
+    };
 }
 
-export async function kpiConversaoPorUsuarioService() {
-    const result = await pool.query(`
+export async function kpiConversaoPorUsuarioService(usuarioLogado) {
+    let query = `
         SELECT 
             u.id_usuario,
             u.nome,
@@ -84,11 +100,29 @@ export async function kpiConversaoPorUsuarioService() {
         FROM usuario u
         LEFT JOIN cliente c 
             ON c.usuario_id = u.id_usuario
+    `;
+
+    const params = [];
+
+    if (usuarioLogado.tipo_usuario !== 'admin') {
+        query += ` WHERE u.id_usuario = $1`;
+        params.push(usuarioLogado.id);
+    }
+
+    query += `
         GROUP BY u.id_usuario, u.nome
         ORDER BY taxa_conversao DESC
-    `);
+    `;
 
-    return result.rows;
+    const result = await pool.query(query, params);
+
+    return result.rows.map(row => ({
+        id_usuario: row.id_usuario,
+        nome: row.nome,
+        fechados: Number(row.fechados),
+        total: Number(row.total),
+        taxa_conversao: Number(row.taxa_conversao)
+    }));
 }
 
 export async function kpiTempoMedioStatusService() {

@@ -24,7 +24,6 @@ router.get('/kpis/cliente-por-usuario',
 // KPI 3 - Conversão (Global ou por usuário) ?tipo=global
 router.get('/kpis/conversao',
     authMiddleware,
-    adminMiddleware,
     kpiConversaoController
 )
 
