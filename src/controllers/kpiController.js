@@ -2,6 +2,7 @@ import { kpiClientePorStatusService,
     kpiClientePorUsuarioService, 
     kpiConversaoGlobalService, 
     kpiConversaoPorUsuarioService, 
+    kpiPorTipoClienteService, 
     kpiTempoMedioStatusService } 
 from "../service/kpisService.js";
 
@@ -79,3 +80,24 @@ export async function kpiTempoMedioStatusController(req, res) {
     }
 }
 
+export async function kpiPorTipoClienteController(req, res) {
+    try {
+        const usuarioLogado = {
+            id: req.user.id,
+            tipo_usuario: req.user.tipo_usuario,
+        }
+
+        const kpi = await kpiPorTipoClienteService(usuarioLogado)
+
+        // console.log("REQ.USER:", req.user);
+
+        return res.status(200).json(kpi);
+
+    } catch (err) {
+        console.error("Erro completo: ", err);
+
+        return res.status(500).json({
+            message: "Erro ao buscar KPI por tipo."
+        })
+    }
+}

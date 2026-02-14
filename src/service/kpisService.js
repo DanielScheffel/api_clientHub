@@ -115,3 +115,28 @@ export async function kpiTempoMedioStatusService() {
 
     return result.rows;
 }
+
+export async function kpiPorTipoClienteService(usuarioLogado) {
+    let query = `
+        SELECT tipo_cliente, COUNT(*) AS quantidade
+        FROM cliente
+    `;
+
+    const params = [];
+
+    // Se não for admin, filtra pelos clientes do usuário
+    if(usuarioLogado.tipo_usuario !== 'admin') {
+        params.push(usuarioLogado.id);
+        query += ` WHERE usuario_id = $1`;
+    }
+    // console.log(usuarioLogado);
+
+    query += ` GROUP BY tipo_cliente ORDER BY tipo_cliente`;
+
+    const result = await pool.query(query, params);
+
+    return result.rows.map(item => ({
+        tipo_cliente: item.tipo_cliente,
+        quantidade: Number(item.quantidade),
+    }))
+}

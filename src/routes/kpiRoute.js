@@ -3,6 +3,7 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { kpiClientePorStatusController, 
     kpiClientePorUsuarioController, 
     kpiConversaoController, 
+    kpiPorTipoClienteController, 
     kpiTempoMedioStatusController } from '../controllers/kpiController.js';
 import { adminMiddleware } from '../middlewares/adminMiddleware.js';
 
@@ -33,6 +34,11 @@ router.get(
     adminMiddleware,
     kpiTempoMedioStatusController
 );
+
+router.get('/kpis/tipo-cliente',
+    authMiddleware,
+    kpiPorTipoClienteController
+)
 
 
 export default router;
