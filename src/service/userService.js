@@ -2,11 +2,29 @@ import pool  from '../database/config.js';
 
 export async function cadastrarClienteService(dadosCliente) {
 
-    const { nome, email, contato, empresa, origem, status, observacao, usuarioId } = dadosCliente;
+    const { 
+      nome, email, contato, empresa, tipo_cliente, cpf, cnpj, origem, status, cidade, estado, observacao, usuarioId
+    } = dadosCliente;
+
+    // 🔎 Validação básica antes do banco
+    if (!nome || !tipo_cliente || !status || !usuarioId) {
+        throw new Error("Campos obrigatórios não informados.");
+    }
+
+    if (tipo_cliente === 'pf' && !cpf) {
+        throw new Error("CPF é obrigatório para pessoa física.");
+    }
+
+    if ((tipo_cliente === 'pj' || tipo_cliente === 'mei') && !cnpj) {
+        throw new Error("CNPJ é obrigatório para PJ ou MEI.");
+    }
 
     const result = await pool.query(
-        'INSERT INTO cliente (nome, email, contato, empresa, origem, status, observacao, usuario_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-        [nome, email, contato, empresa, origem, status, observacao, usuarioId]
+        `INSERT INTO cliente 
+        (nome, email, contato, empresa, tipo_cliente, cpf, cnpj, origem, status, cidade, estado, observacao, usuario_id) 
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+        RETURNING *`,
+        [nome, email, contato, empresa, tipo_cliente, cpf || null, cnpj || null, origem, status, cidade, estado, observacao, usuarioId]
     )
 
     return result.rows[0];
@@ -72,7 +90,7 @@ export async function buscarClienteIdService({ clienteId, usuarioId }) {
 export async function editarClienteService({ clienteId, dadosCliente, usuarioId }) {
 
     const clienteAtual = await pool.query(
-        `SELECT nome, email, contato, empresa, observacao FROM cliente WHERE id_cliente = $1 AND usuario_id = $2`,
+        `SELECT nome, email, contato, empresa, cidade, estado, observacao FROM cliente WHERE id_cliente = $1 AND usuario_id = $2`,
         [clienteId, usuarioId]
     )
 
@@ -82,15 +100,30 @@ export async function editarClienteService({ clienteId, dadosCliente, usuarioId 
 
     const cliente = clienteAtual.rows[0];
 
+    // 🚫 Bloqueia alteração de campos proibidos
+    if (dadosCliente.tipo_cliente && dadosCliente.tipo_cliente !== cliente.tipo_cliente) {
+        throw new Error("Não é permitido alterar o tipo de cliente.");
+    }
+
+    if (dadosCliente.cnpj && dadosCliente.cnpj !== cliente.cnpj) {
+        throw new Error("Não é permitido alterar o CNPJ.");
+    }
+
+    if(dadosCliente.cpf && dadosCliente.cpf !== cliente.cpf) {
+      throw new Error("Não é permitido alterar o CPF.")
+    }
+
     const nome = dadosCliente.nome ?? cliente.nome;
     const email = dadosCliente.email ?? cliente.email;
     const contato = dadosCliente.contato ?? cliente.contato;
     const empresa = dadosCliente.empresa ?? cliente.empresa;
+    const cidade = dadosCliente.cidade ?? cliente.cidade;
+    const estado = dadosCliente.estado ?? cliente.estado;
     const observacao = dadosCliente.observacao ?? cliente.observacao;
 
     const result = await pool.query(
-        `UPDATE cliente SET nome = $1, email = $2, contato = $3, empresa = $4, observacao = $5 WHERE id_cliente = $6 AND usuario_id = $7 RETURNING *`,
-        [nome, email, contato, empresa, observacao, clienteId, usuarioId]
+        `UPDATE cliente SET nome = $1, email = $2, contato = $3, empresa = $4, cidade = $5, estado = $6, observacao = $7 WHERE id_cliente = $8 AND usuario_id = $9 RETURNING *`,
+        [nome, email, contato, empresa, cidade, estado, observacao, clienteId, usuarioId]
     )
 
     return result.rows[0];

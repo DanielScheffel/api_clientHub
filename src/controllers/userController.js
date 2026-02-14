@@ -14,11 +14,11 @@ export async function cadastroClienteController(req, res) {
 
         const usuarioId = req.user.id;
 
-        const { nome, email, contato, empresa, origem, observacao } = req.body;
+        const { nome, email, contato, empresa, tipo_cliente, cpf, cnpj, origem, cidade, estado, observacao } = req.body;
 
         // Lógica para cadastrar o cliente usando os dados fornecidos
         const cliente = await cadastrarClienteService({
-            nome, email, contato, empresa, origem, status: "novo", observacao, usuarioId
+            nome, email, contato, empresa, tipo_cliente, cpf, cnpj, origem, cidade, estado, status: "novo", observacao, usuarioId
         });
 
 
@@ -119,10 +119,16 @@ export async function editarClienteController(req, res) {
         })
     } catch (error) {
         
-        if (error.message.includes('Não encontrado') || error.message.includes('Nenhum campo para atualizar')) {
+        if (error.message === "CLIENTE_NAO_ENCONTRADO") {
+            return res.status(404).json({
+                message: "Cliente não encontrado."
+            });
+        }
+
+        if (error.message === "ALTERACAO_NAO_PERMITIDA") {
             return res.status(400).json({
-                message: error.message
-            })
+                message: "Não é permitido alterar este campo."
+            });
         }
 
         return res.status(500).json({
