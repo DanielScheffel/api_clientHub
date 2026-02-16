@@ -174,3 +174,32 @@ export async function kpiPorTipoClienteService(usuarioLogado) {
         quantidade: Number(item.quantidade),
     }))
 }
+
+export async function kpiPorOrigemService(usuarioLogado) {
+    let query = `SELECT 
+            origem,
+            COUNT(*) AS total,
+            ROUND(
+                COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (),
+                2
+            ) AS percentual
+        FROM cliente`;
+
+    const params = [];
+
+    if (usuarioLogado.tipo_usuario !== 'admin') {
+        query += ` WHERE usuario_id = $1`;
+        params.push(usuarioLogado.id);
+    }
+
+    query += ` GROUP BY origem
+        ORDER BY total DESC`;
+
+    const result = await pool.query(query, params);
+
+    return result.rows.map(row => ({
+        origem: row.origem,
+        total: Number(row.total),
+        percentual: Number(row.percentual)
+    }))
+}

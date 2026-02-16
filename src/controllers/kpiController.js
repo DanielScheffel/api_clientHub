@@ -2,6 +2,7 @@ import { kpiClientePorStatusService,
     kpiClientePorUsuarioService, 
     kpiConversaoGlobalService, 
     kpiConversaoPorUsuarioService, 
+    kpiPorOrigemService, 
     kpiPorTipoClienteService, 
     kpiTempoMedioStatusService } 
 from "../service/kpisService.js";
@@ -106,6 +107,24 @@ export async function kpiPorTipoClienteController(req, res) {
 
         return res.status(500).json({
             message: "Erro ao buscar KPI por tipo."
+        })
+    }
+}
+
+export async function kpiPorOrigemController(req, res) {
+    try {
+        const usuarioLogado = {
+            id: req.user.id,
+            tipo_usuario: req.user.tipo_usuario
+        }
+
+        const result = await kpiPorOrigemService(usuarioLogado);
+
+        return res.status(200).json(result)
+    } catch (err) {
+        console.error("ERRO KPI por origem: ", err)
+        return res.status(500).json({
+            message: "Erro ao buscar KPI por origem"
         })
     }
 }

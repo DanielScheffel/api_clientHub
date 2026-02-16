@@ -3,6 +3,7 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { kpiClientePorStatusController, 
     kpiClientePorUsuarioController, 
     kpiConversaoController, 
+    kpiPorOrigemController, 
     kpiPorTipoClienteController, 
     kpiTempoMedioStatusController } from '../controllers/kpiController.js';
 import { adminMiddleware } from '../middlewares/adminMiddleware.js';
@@ -11,13 +12,11 @@ const router = express.Router();
 
 router.get('/kpis/clientes-por-status',
     authMiddleware,
-    adminMiddleware,
     kpiClientePorStatusController
 )
 
 router.get('/kpis/cliente-por-usuario',
     authMiddleware,
-    adminMiddleware,
     kpiClientePorUsuarioController
 )
 
@@ -37,6 +36,12 @@ router.get(
 router.get('/kpis/tipo-cliente',
     authMiddleware,
     kpiPorTipoClienteController
+)
+
+router.get('/kpis/origem',
+    authMiddleware,
+    adminMiddleware,
+    kpiPorOrigemController
 )
 
 
