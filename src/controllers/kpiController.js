@@ -2,6 +2,7 @@ import { kpiClientePorStatusService,
     kpiClientePorUsuarioService, 
     kpiConversaoGlobalService, 
     kpiConversaoPorUsuarioService, 
+    kpiFunilStatusService, 
     kpiPorOrigemService, 
     kpiPorTipoClienteService, 
     kpiTempoMedioStatusService } 
@@ -125,6 +126,28 @@ export async function kpiPorOrigemController(req, res) {
         console.error("ERRO KPI por origem: ", err)
         return res.status(500).json({
             message: "Erro ao buscar KPI por origem"
+        })
+    }
+}
+
+export async function kpiFunilStatusController(req, res) {
+    try {
+        const usuarioLogado = {
+            id: Number(req.user.id),
+            tipo_usuario: req.user.tipo_usuario
+        }
+
+        // console.log("User: ", req.user);
+        // console.log("usuarioLogado: ", usuarioLogado);
+
+        const resultado = await kpiFunilStatusService(usuarioLogado);
+
+        return res.status(200).json(resultado)
+    } catch (error) {
+        console.error('Erro KPI funil', error)
+
+        return res.status(500).json({
+            message: 'Erro ao buscar KPI de funil'
         })
     }
 }

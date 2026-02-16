@@ -3,6 +3,7 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { kpiClientePorStatusController, 
     kpiClientePorUsuarioController, 
     kpiConversaoController, 
+    kpiFunilStatusController, 
     kpiPorOrigemController, 
     kpiPorTipoClienteController, 
     kpiTempoMedioStatusController } from '../controllers/kpiController.js';
@@ -42,6 +43,12 @@ router.get('/kpis/origem',
     authMiddleware,
     adminMiddleware,
     kpiPorOrigemController
+)
+
+router.get('/kpis/funil',
+    authMiddleware,
+    // adminMiddleware,
+    kpiFunilStatusController
 )
 
 

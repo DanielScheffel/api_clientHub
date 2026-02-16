@@ -200,6 +200,34 @@ export async function kpiPorOrigemService(usuarioLogado) {
     return result.rows.map(row => ({
         origem: row.origem,
         total: Number(row.total),
-        percentual: Number(row.percentual)
+        percentual: Number(row.pe)
+    }))
+}
+
+export async function kpiFunilStatusService(usuarioLogado) {
+    let query = `SELECT 
+            status,
+            COUNT(*) AS total,
+            ROUND(
+                COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (),
+                2
+            ) AS percentual
+        FROM cliente`;
+
+    const params = [];
+
+    if(usuarioLogado.tipo_usuario !== 'admin') {
+        query += ` WHERE usuario_id = $1`
+        params.push(usuarioLogado.id)
+    }
+
+    query += ` GROUP BY status ORDER BY total DESC`
+
+    const result = await pool.query(query, params);
+
+    return result.rows.map(r => ({
+        status: r.status,
+        total: Number(r.total),
+        percentual: Number(r.percentual)
     }))
 }
