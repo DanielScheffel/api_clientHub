@@ -231,3 +231,11 @@ export async function kpiFunilStatusService(usuarioLogado) {
         percentual: Number(r.percentual)
     }))
 }
+
+export async function kpiClienteMesService() {
+    const result = await pool.query(`SELECT COUNT(*) AS total
+        FROM cliente
+        WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)`);
+
+    return Number(result.rows[0].total);
+}

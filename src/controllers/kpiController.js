@@ -1,4 +1,4 @@
-import { kpiClientePorStatusService, 
+import { kpiClienteMesService, kpiClientePorStatusService, 
     kpiClientePorUsuarioService, 
     kpiConversaoGlobalService, 
     kpiConversaoPorUsuarioService, 
@@ -148,6 +148,20 @@ export async function kpiFunilStatusController(req, res) {
 
         return res.status(500).json({
             message: 'Erro ao buscar KPI de funil'
+        })
+    }
+}
+
+export async function kpiClienteMesController(req, res) {
+    try {
+        const total = await kpiClienteMesService();
+
+        return res.status(200).json({ total })
+    } catch (error) {
+        console.error('Erro KPI clientes mÊs (admin)', error);
+
+        return res.status(500).json({
+            message: 'Erro ao buscar KPI de clientes do mês'
         })
     }
 }
