@@ -2,14 +2,22 @@ import express from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { kpiClienteMesController, kpiClientePorStatusController, 
     kpiClientePorUsuarioController, 
+    kpiClientesUltimosDiasController, 
     kpiConversaoController, 
     kpiFunilStatusController, 
     kpiPorOrigemController, 
     kpiPorTipoClienteController, 
-    kpiTempoMedioStatusController } from '../controllers/kpiController.js';
+    kpiTempoMedioStatusController, 
+    kpiTotalClientesController} from '../controllers/kpiController.js';
 import { adminMiddleware } from '../middlewares/adminMiddleware.js';
 
 const router = express.Router();
+
+router.get('/kpis/total',
+    authMiddleware,
+    adminMiddleware,
+    kpiTotalClientesController
+)
 
 router.get('/kpis/clientes-por-status',
     authMiddleware,
@@ -18,6 +26,7 @@ router.get('/kpis/clientes-por-status',
 
 router.get('/kpis/cliente-por-usuario',
     authMiddleware,
+    adminMiddleware,
     kpiClientePorUsuarioController
 )
 
@@ -55,6 +64,12 @@ router.get('/kpis/clientes/mes',
     authMiddleware,
     adminMiddleware,
     kpiClienteMesController
+)
+
+router.post('/kpis/clientes/ultimos-dias',
+    authMiddleware,
+    adminMiddleware,
+    kpiClientesUltimosDiasController
 )
 
 

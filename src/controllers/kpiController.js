@@ -1,13 +1,33 @@
 import { kpiClienteMesService, kpiClientePorStatusService, 
     kpiClientePorUsuarioService, 
+    kpiClientesUltimosDiasService, 
     kpiConversaoGlobalService, 
     kpiConversaoPorUsuarioService, 
     kpiFunilStatusService, 
     kpiPorOrigemService, 
     kpiPorTipoClienteService, 
-    kpiTempoMedioStatusService } 
+    kpiTempoMedioStatusService, 
+    kpiTotalClientesService} 
 from "../service/kpisService.js";
 
+
+export async function kpiTotalClientesController(req, res) {
+    try {
+        const resultado = await kpiTotalClientesService();
+
+        return res.status(200).json({
+            message: 'Total de Clientes:',
+            resultado
+        })
+    } catch (error) {
+        console.error('Erro na KPI total de clientes', error)
+
+        return res.status(500).json({
+            message: 'Erro ao buscar KPI total de clientes',
+            error
+        })
+    }
+}
 
 export async function kpiClientePorStatusController(req, res) {
     try {
@@ -162,6 +182,27 @@ export async function kpiClienteMesController(req, res) {
 
         return res.status(500).json({
             message: 'Erro ao buscar KPI de clientes do mês'
+        })
+    }
+}
+
+export async function kpiClientesUltimosDiasController(req, res) {
+    try {
+        const { dias } = req.query;
+
+        if(!dias || isNaN(dias)) {
+            return res.status(400).json({
+                message: 'Informe um número válido de dias'
+            })
+        }
+
+        const total = await kpiClientesUltimosDiasService(Number(dias));
+
+        return res.status(200).json({ total })
+    } catch (error) {
+        console.error('Erro KPI últimos dias', error)
+        return res.status(500).json({
+            message: 'Erro ao buscar KPI dos últimos dias'
         })
     }
 }

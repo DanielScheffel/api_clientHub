@@ -1,6 +1,12 @@
 import pool from '../database/config.js';
 
+export async function kpiTotalClientesService() {
+    const result = await pool.query(`SELECT COUNT(*) AS total FROM cliente`)
 
+    return result.rows;
+}
+
+// KPI de clientes por status
 export async function kpiClientePorStatusService(usuarioLogado) {
     let query = `
         SELECT status, COUNT(*) AS total
@@ -26,17 +32,18 @@ export async function kpiClientePorStatusService(usuarioLogado) {
 
 }
 
+// KPI de clientes por usuário
 export async function kpiClientePorUsuarioService(usuarioLogado) {
 
-    let filtroUsuario = '';
-    let valores = [];
+    // let filtroUsuario = '';
+    // let valores = [];
 
-    if(usuarioLogado.tipo_usuario !== 'admin') {
-        filtroUsuario = ' WHERE u.id_usuario = $1';
-        valores.push(usuarioLogado.id)
-    }
+    // if(usuarioLogado.tipo_usuario !== 'admin') {
+    //     filtroUsuario = ' WHERE u.id_usuario = $1';
+    //     valores.push(usuarioLogado.id)
+    // }
 
-    const query = `
+    const result = await pool.query(`
         SELECT
             u.id_usuario,
             u.nome,
@@ -48,14 +55,16 @@ export async function kpiClientePorUsuarioService(usuarioLogado) {
         WHERE u.status = 'ativo'
         GROUP BY u.id_usuario, u.nome
         ORDER BY total_clientes DESC
-    `;
+    `);
 
-    const result = await pool.query(query, valores);
+    // const result = await pool.query(query, valores);
 
     return result.rows;
 
 }
 
+
+// KPI de clientes conversâo global
 export async function kpiConversaoGlobalService(usuarioLogado) {
     let query = `
         SELECT 
@@ -85,6 +94,7 @@ export async function kpiConversaoGlobalService(usuarioLogado) {
     };
 }
 
+// KPI de clientes de conversão por usuário
 export async function kpiConversaoPorUsuarioService(usuarioLogado) {
     let query = `
         SELECT 
@@ -125,6 +135,8 @@ export async function kpiConversaoPorUsuarioService(usuarioLogado) {
     }));
 }
 
+
+// KPI de clientes por tempo médio de status
 export async function kpiTempoMedioStatusService() {
     const result = await pool.query(`
         WITH tempos AS (
@@ -150,6 +162,8 @@ export async function kpiTempoMedioStatusService() {
     return result.rows;
 }
 
+
+// KPI de clientes por tipo, PF, PJ e MEI
 export async function kpiPorTipoClienteService(usuarioLogado) {
     let query = `
         SELECT tipo_cliente, COUNT(*) AS quantidade
@@ -175,6 +189,7 @@ export async function kpiPorTipoClienteService(usuarioLogado) {
     }))
 }
 
+// KPI de clientes por Origem, site, indicação e whatsApp
 export async function kpiPorOrigemService(usuarioLogado) {
     let query = `SELECT 
             origem,
@@ -200,10 +215,11 @@ export async function kpiPorOrigemService(usuarioLogado) {
     return result.rows.map(row => ({
         origem: row.origem,
         total: Number(row.total),
-        percentual: Number(row.pe)
+        percentual: Number(row.percentual)
     }))
 }
 
+// KPI de clientes de Funil status
 export async function kpiFunilStatusService(usuarioLogado) {
     let query = `SELECT 
             status,
@@ -232,10 +248,21 @@ export async function kpiFunilStatusService(usuarioLogado) {
     }))
 }
 
+// KPI de clientes no mês
 export async function kpiClienteMesService() {
     const result = await pool.query(`SELECT COUNT(*) AS total
         FROM cliente
         WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)`);
 
     return Number(result.rows[0].total);
+}
+
+// KPI de clientes por últimos dias
+export async function kpiClientesUltimosDiasService(dias) {
+    const result = await pool.query(`
+            SELECT COUNT(*) AS total FROM cliente
+            WHERE created_at >= NOW() - ($1 || ' days')::interval
+        `, [dias])
+
+    return Number(result.rows[0].total)
 }
