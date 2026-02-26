@@ -166,7 +166,13 @@ export async function kpiTempoMedioStatusService() {
 // KPI de clientes por tipo, PF, PJ e MEI
 export async function kpiPorTipoClienteService(usuarioLogado) {
     let query = `
-        SELECT tipo_cliente, COUNT(*) AS quantidade
+        SELECT 
+            tipo_cliente,
+            COUNT(*) AS quantidade,
+            ROUND(
+                (COUNT(*)::decimal / SUM(COUNT(*)) OVER ()) * 100, 
+                2
+            ) AS percentual
         FROM cliente
     `;
 
@@ -186,6 +192,8 @@ export async function kpiPorTipoClienteService(usuarioLogado) {
     return result.rows.map(item => ({
         tipo_cliente: item.tipo_cliente,
         quantidade: Number(item.quantidade),
+        percentual: Number(item.percentual),
+        // percentual: Math.round(Number(item.percentual)),
     }))
 }
 
@@ -250,11 +258,38 @@ export async function kpiFunilStatusService(usuarioLogado) {
 
 // KPI de clientes no mês
 export async function kpiClienteMesService() {
-    const result = await pool.query(`SELECT COUNT(*) AS total
-        FROM cliente
-        WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)`);
+    // const result = await pool.query(`SELECT COUNT(*) AS total
+    //     FROM cliente
+    //     WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)`);
 
-    return Number(result.rows[0].total);
+    // return Number(result.rows[0].total);
+
+    const result = await pool.query(`
+        SELECT
+            COUNT(*) FILTER (
+                WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE)
+            ) AS mes_atual,
+
+            COUNT(*) FILTER (
+                WHERE DATE_TRUNC('month', created_at) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
+            ) AS mes_anterior
+        FROM cliente
+    `);
+
+    const mesAtual = Number(result.rows[0].mes_atual);
+    const mesAnterior = Number(result.rows[0].mes_anterior);
+
+    // cálculo de variação (%)
+    let variacao = null;
+    if (mesAnterior > 0) {
+        variacao = Number((((mesAtual - mesAnterior) / mesAnterior) * 100).toFixed(2));
+    }
+
+    return {
+        mes_atual: mesAtual,
+        mes_anterior: mesAnterior,
+        variacao_percentual: variacao
+    };
 }
 
 // KPI de clientes por últimos dias

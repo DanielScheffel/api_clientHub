@@ -188,7 +188,7 @@ export async function kpiClienteMesController(req, res) {
 
 export async function kpiClientesUltimosDiasController(req, res) {
     try {
-        const { dias } = req.query;
+        const dias = Number(req.query.dias);
 
         if(!dias || isNaN(dias)) {
             return res.status(400).json({

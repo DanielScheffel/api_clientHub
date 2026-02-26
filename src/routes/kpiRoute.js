@@ -66,7 +66,7 @@ router.get('/kpis/clientes/mes',
     kpiClienteMesController
 )
 
-router.post('/kpis/clientes/ultimos-dias',
+router.get('/kpis/clientes/ultimos-dias',
     authMiddleware,
     adminMiddleware,
     kpiClientesUltimosDiasController
